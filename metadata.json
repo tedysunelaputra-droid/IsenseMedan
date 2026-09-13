@@ -1,0 +1,6 @@
+{
+  "name": "Isense Medan",
+  "description": "Sistem Informasi Manajemen Data EQ Isense Medan - Dashboard, Input Data & Pengelolaan EQ berbasis Web",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Isense Medan - Sistem Manajemen Data EQ</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Font Google Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ========================================== -->
+  <!-- TOAST NOTIFIKASI                           -->
+  <!-- ========================================== -->
+  <div id="toast" class="fixed top-5 right-5 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none max-w-sm w-full">
+    <div id="toast-content" class="rounded-xl shadow-lg border p-4 flex items-center gap-3 bg-white">
+      <div id="toast-icon" class="p-2 rounded-lg"></div>
+      <div class="flex-1">
+        <p id="toast-title" class="text-sm font-semibold text-slate-900"></p>
+        <p id="toast-message" class="text-xs text-slate-600 mt-0.5"></p>
+      </div>
+      <button onclick="hideToast()" class="text-slate-400 hover:text-slate-600 p-1">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. HALAMAN LOGIN                           -->
+  <!-- ========================================== -->
+  <div id="page-login" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950">
+    <div class="w-full max-w-md bg-white/95 backdrop-blur rounded-2xl shadow-2xl border border-slate-100 p-8">
+      
+      <!-- Brand Logo & Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 mb-4">
+          <i data-lucide="layers" class="w-7 h-7"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Isense Medan</h1>
+        <p class="text-slate-500 text-sm mt-1">Sistem Manajemen & Pelacakan Data EQ</p>
+      </div>
+
+      <!-- Tab Switcher: Masuk vs Buat Akun -->
+      <div class="flex bg-slate-100 p-1 rounded-xl mb-6 border border-slate-200">
+        <button 
+          type="button" 
+          id="btn-tab-login"
+          onclick="switchAuthMode('login')"
+          class="flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-white text-emerald-700 shadow-sm"
+        >
+          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+          <span>Masuk</span>
+        </button>
+        <button 
+          type="button" 
+          id="btn-tab-register"
+          onclick="switchAuthMode('register')"
+          class="flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900"
+        >
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+          <span>Buat Akun Baru</span>
+        </button>
+      </div>
+
+      <!-- Alert Notifikasi Auth -->
+      <div id="auth-alert" class="hidden mb-4 p-3 rounded-xl text-xs flex items-center gap-2">
+        <i id="auth-alert-icon" data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+        <span id="auth-alert-text"></span>
+      </div>
+
+      <!-- Form Login (Kosongan) -->
+      <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label for="login-username" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Username</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="text" 
+              id="login-username" 
+              name="username" 
+              placeholder="Masukkan username" 
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+              required 
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="login-password" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="password" 
+              id="login-password" 
+              name="password" 
+              placeholder="Masukkan password" 
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+              required 
+            />
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="btn-login" 
+          class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-medium py-2.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 text-sm"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Masuk ke Sistem</span>
+        </button>
+
+        <p class="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+          Belum memiliki akun? <button type="button" onclick="switchAuthMode('register')" class="text-emerald-700 hover:underline font-semibold">Daftar sekarang</button>
+        </p>
+      </form>
+
+      <!-- Form Register / Buat Akun Baru -->
+      <form id="form-register" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
+        <div>
+          <label for="reg-nama" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Nama Lengkap</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i data-lucide="badge-check" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="text" 
+              id="reg-nama" 
+              placeholder="Contoh: Tedyy Sunella" 
+              class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+              required 
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="reg-username" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Username Baru</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i data-lucide="user" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="text" 
+              id="reg-username" 
+              placeholder="Pilih username tanpa spasi" 
+              class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+              required 
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="reg-password" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="password" 
+              id="reg-password" 
+              placeholder="Minimal 5 karakter" 
+              class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+              required 
+            />
+          </div>
+        </div>
+
+        <div>
+          <label for="reg-confirm" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">Konfirmasi Password</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </span>
+            <input 
+              type="password" 
+              id="reg-confirm" 
+              placeholder="Ulangi password" 
+              class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+              required 
+            />
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          id="btn-register" 
+          class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-medium py-2.5 px-4 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 text-sm"
+        >
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          <span>Daftar Akun Baru</span>
+        </button>
+
+        <p class="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+          Sudah memiliki akun? <button type="button" onclick="switchAuthMode('login')" class="text-emerald-700 hover:underline font-semibold">Masuk di sini</button>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. APLIKASI UTAMA (DASHBOARD & KELOLA EQ)   -->
+  <!-- ========================================== -->
+  <div id="page-app" class="hidden min-h-screen flex-col">
+    
+    <!-- Top Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        <!-- Logo & Title -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-600/20">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h1 class="font-bold text-slate-900 leading-tight">Isense Medan</h1>
+            <p class="text-xs text-slate-500">Sistem Manajemen Data EQ</p>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <button 
+            id="tab-btn-dashboard" 
+            onclick="switchTab('dashboard')" 
+            class="px-4 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-2 bg-white text-emerald-700 shadow-sm"
+          >
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Dashboard</span>
+          </button>
+          <button 
+            id="tab-btn-input" 
+            onclick="switchTab('input')" 
+            class="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2"
+          >
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Input EQ</span>
+          </button>
+          <button 
+            id="tab-btn-data" 
+            onclick="switchTab('data')" 
+            class="px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2"
+          >
+            <i data-lucide="database" class="w-4 h-4"></i>
+            <span>Data EQ</span>
+          </button>
+        </nav>
+
+        <!-- User Profile & Logout -->
+        <div class="flex items-center gap-3">
+          <div class="text-right hidden sm:block">
+            <p id="user-display-name" class="text-sm font-semibold text-slate-800">Admin Isense</p>
+            <p class="text-xs text-emerald-600 font-medium">Cabang Medan</p>
+          </div>
+          <button 
+            onclick="handleLogout()" 
+            title="Keluar" 
+            class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-1.5 text-sm font-medium"
+          >
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Mobile Sub-nav -->
+      <div class="md:hidden flex border-t border-slate-200 bg-slate-50 px-4 py-2 gap-2 overflow-x-auto">
+        <button onclick="switchTab('dashboard')" class="px-3 py-1 text-xs rounded-lg font-medium bg-white text-emerald-700 shadow-xs">Dashboard</button>
+        <button onclick="switchTab('input')" class="px-3 py-1 text-xs rounded-lg font-medium text-slate-600">Input EQ</button>
+        <button onclick="switchTab('data')" class="px-3 py-1 text-xs rounded-lg font-medium text-slate-600">Data EQ</button>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+      
+      <!-- ========================================== -->
+      <!-- TAB 1: DASHBOARD                           -->
+      <!-- ========================================== -->
+      <section id="view-dashboard" class="space-y-6">
+        
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 rounded-2xl p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <span class="inline-block px-2.5 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-2">Pusat Kendali</span>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Ringkasan Operasional EQ Medan</h2>
+            <p class="text-emerald-100 text-sm mt-1 max-w-xl">Pantau status pengerjaan equipment/estimation Isense Medan secara real-time.</p>
+          </div>
+          <button 
+            onclick="switchTab('input')" 
+            class="bg-white text-emerald-800 hover:bg-emerald-50 px-5 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2 shadow"
+          >
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Tambah Data EQ Baru</span>
+          </button>
+        </div>
+
+        <!-- 4 Stat Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          
+          <!-- Card Total EQ -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total EQ</span>
+              <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <p id="stat-total" class="text-3xl font-bold text-slate-900 mt-3">0</p>
+            <p class="text-xs text-slate-500 mt-1">Keseluruhan berkas terdaftar</p>
+          </div>
+
+          <!-- Card EQ Diproses -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-amber-700">EQ Diproses</span>
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <p id="stat-diproses" class="text-3xl font-bold text-amber-600 mt-3">0</p>
+            <p class="text-xs text-slate-500 mt-1">Sedang dalam penanganan</p>
+          </div>
+
+          <!-- Card EQ Selesai -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700">EQ Selesai</span>
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <p id="stat-selesai" class="text-3xl font-bold text-emerald-600 mt-3">0</p>
+            <p class="text-xs text-slate-500 mt-1">Tuntas dikerjakan</p>
+          </div>
+
+          <!-- Card EQ Batal -->
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-rose-700">EQ Batal</span>
+              <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                <i data-lucide="x-circle" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <p id="stat-batal" class="text-3xl font-bold text-rose-600 mt-3">0</p>
+            <p class="text-xs text-slate-500 mt-1">Dibatalkan / tidak lanjut</p>
+          </div>
+
+        </div>
+
+        <!-- Recent EQ Activity Table -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+          <div class="p-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 class="font-bold text-slate-900">Aktivitas Data EQ Terbaru</h3>
+              <p class="text-xs text-slate-500 mt-0.5">5 catatan EQ terakhir yang masuk ke sistem</p>
+            </div>
+            <button 
+              onclick="switchTab('data')" 
+              class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+            >
+              <span>Lihat Semua Data</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+              <thead class="bg-slate-50/80 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                <tr>
+                  <th class="py-3 px-4">Nomor EQ</th>
+                  <th class="py-3 px-4">Customer</th>
+                  <th class="py-3 px-4">CST</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Tanggal Masuk</th>
+                </tr>
+              </thead>
+              <tbody id="table-recent-body" class="divide-y divide-slate-100">
+                <!-- Diisi via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 2: INPUT EQ (FORM)                     -->
+      <!-- ========================================== -->
+      <section id="view-input" class="hidden space-y-6">
+        <div class="max-w-3xl mx-auto">
+          
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8">
+            <div class="flex items-center gap-3 pb-6 border-b border-slate-100 mb-6">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <i data-lucide="file-plus" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h2 class="text-xl font-bold text-slate-900">Formulir Input Data EQ</h2>
+                <p class="text-xs text-slate-500">Tambahkan data equipment baru ke dalam database Isense Medan</p>
+              </div>
+            </div>
+
+            <form id="form-create-eq" onsubmit="handleCreateEq(event)" class="space-y-5">
+              
+              <!-- Nomor EQ -->
+              <div>
+                <label for="create-nomor-eq" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Nomor EQ <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="create-nomor-eq" 
+                  placeholder="Contoh: EQ-2025-MDN-007" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm font-mono transition"
+                  required 
+                />
+              </div>
+
+              <!-- Nama Customer -->
+              <div>
+                <label for="create-nama-customer" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Nama Customer <span class="text-rose-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="create-nama-customer" 
+                  placeholder="Contoh: PT. Maju Berkah Bersama" 
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition"
+                  required 
+                />
+              </div>
+
+              <!-- CST & Status (2 Kolom) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <!-- CST -->
+                <div>
+                  <label for="create-cst" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                    CST (Customer Service Team) <span class="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="create-cst" 
+                    placeholder="Contoh: CST-Budi Santoso" 
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition"
+                    required 
+                  />
+                </div>
+
+                <!-- Status -->
+                <div>
+                  <label for="create-status" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Status Pengerjaan <span class="text-rose-500">*</span>
+                  </label>
+                  <select 
+                    id="create-status" 
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition bg-white"
+                    required
+                  >
+                    <option value="Pending">Pending (Menunggu)</option>
+                    <option value="Diproses" selected>Diproses (Sedang Berjalan)</option>
+                    <option value="Selesai">Selesai (Tuntas)</option>
+                    <option value="Batal">Batal (Dibatalkan)</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                <button 
+                  type="reset" 
+                  class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-sm font-medium transition"
+                >
+                  Reset Form
+                </button>
+                <button 
+                  type="submit" 
+                  id="btn-simpan-eq" 
+                  class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-sm font-semibold transition flex items-center gap-2 shadow-md shadow-emerald-600/20"
+                >
+                  <i data-lucide="save" class="w-4 h-4"></i>
+                  <span>Simpan EQ</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- TAB 3: MANAJEMEN DATA EQ                   -->
+      <!-- ========================================== -->
+      <section id="view-data" class="hidden space-y-6">
+        
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          
+          <!-- Filter & Controls Header -->
+          <div class="p-5 border-b border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Tabel Manajemen Data EQ</h2>
+              <p class="text-xs text-slate-500">Kelola, perbarui, dan pantau status seluruh data EQ</p>
+            </div>
+
+            <div class="flex items-center flex-wrap gap-2.5">
+              
+              <!-- Search Bar -->
+              <div class="relative flex-1 sm:w-64">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <i data-lucide="search" class="w-4 h-4"></i>
+                </span>
+                <input 
+                  type="text" 
+                  id="data-search-input" 
+                  oninput="handleSearchData()" 
+                  placeholder="Cari EQ / Customer / CST..." 
+                  class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                />
+              </div>
+
+              <!-- Filter Status -->
+              <select 
+                id="data-status-filter" 
+                onchange="handleFilterStatus()" 
+                class="px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+              >
+                <option value="">Semua Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Diproses">Diproses</option>
+                <option value="Selesai">Selesai</option>
+                <option value="Batal">Batal</option>
+              </select>
+
+              <!-- Tombol Refresh -->
+              <button 
+                onclick="loadEqData()" 
+                title="Muat Ulang Data" 
+                class="p-2 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl transition"
+              >
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              </button>
+
+              <!-- Tombol Tambah Baru -->
+              <button 
+                onclick="switchTab('input')" 
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition"
+              >
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Tambah EQ</span>
+              </button>
+
+            </div>
+
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-700">
+              <thead class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                <tr>
+                  <th class="py-3.5 px-4 w-12 text-center">No</th>
+                  <th class="py-3.5 px-4">Nomor EQ</th>
+                  <th class="py-3.5 px-4">Nama Customer</th>
+                  <th class="py-3.5 px-4">CST</th>
+                  <th class="py-3.5 px-4">Status</th>
+                  <th class="py-3.5 px-4">Waktu Pendaftaran</th>
+                  <th class="py-3.5 px-4 text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="table-eq-body" class="divide-y divide-slate-100">
+                <!-- Data akan dimuat dari API via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table Footer Count -->
+          <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Menampilkan <strong id="count-filtered" class="text-slate-800">0</strong> dari <strong id="count-total" class="text-slate-800">0</strong> data EQ</span>
+            <span class="font-mono text-[11px] text-slate-400">Database: isense_medan</span>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+      <p>&copy; <strong>Isense Medan</strong> - Sistem Manajemen Operasional Data EQ.</p>
+    </footer>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL EDIT DATA EQ                         -->
+  <!-- ========================================== -->
+  <div id="modal-edit" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900">Perbarui Data EQ</h3>
+            <p class="text-xs text-slate-500">Ubah detail data EQ</p>
+          </div>
+        </div>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Form -->
+      <form id="form-edit-eq" onsubmit="handleUpdateEq(event)" class="p-6 space-y-4">
+        <input type="hidden" id="edit-id" />
+
+        <!-- Nomor EQ -->
+        <div>
+          <label for="edit-nomor-eq" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+            Nomor EQ <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="edit-nomor-eq" 
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-sm transition"
+            required 
+          />
+        </div>
+
+        <!-- Nama Customer -->
+        <div>
+          <label for="edit-nama-customer" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+            Nama Customer <span class="text-rose-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="edit-nama-customer" 
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+            required 
+          />
+        </div>
+
+        <!-- CST & Status -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="edit-cst" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+              CST <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="edit-cst" 
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition"
+              required 
+            />
+          </div>
+
+          <div>
+            <label for="edit-status" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+              Status <span class="text-rose-500">*</span>
+            </label>
+            <select 
+              id="edit-status" 
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white transition"
+              required
+            >
+              <option value="Pending">Pending</option>
+              <option value="Diproses">Diproses</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Batal">Batal</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-4 flex items-center justify-end gap-2.5 border-t border-slate-100">
+          <button 
+            type="button" 
+            onclick="closeEditModal()" 
+            class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-medium transition"
+          >
+            Batal
+          </button>
+          <button 
+            type="submit" 
+            id="btn-update-eq" 
+            class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>Simpan Perubahan</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL KONFIRMASI HAPUS                     -->
+  <!-- ========================================== -->
+  <div id="modal-delete" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-100 p-6 text-center">
+      <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="trash-2" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900">Hapus Data EQ?</h3>
+      <p class="text-xs text-slate-500 mt-1">
+        Anda yakin ingin menghapus data dengan Nomor EQ <strong id="delete-nomor-eq" class="text-rose-600 font-mono"></strong>? Tindakan ini tidak dapat dibatalkan.
+      </p>
+      <input type="hidden" id="delete-id" />
+      <div class="mt-6 flex items-center justify-center gap-3">
+        <button 
+          type="button" 
+          onclick="closeDeleteModal()" 
+          class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-medium transition"
+        >
+          Batalkan
+        </button>
+        <button 
+          type="button" 
+          id="btn-confirm-delete" 
+          onclick="confirmDeleteEq()" 
+          class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm"
+        >
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+          <span>Ya, Hapus Data</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT: LOGIKA APLIKASI & FETCH API    -->
+  <!-- ========================================== -->
+  <script>
+    // URL Endpoint API PHP
+    const API_URL = 'api.php';
+
+    // State Aplikasi
+    let currentUser = null;
+    let allEqData = [];
+
+    // Inisialisasi saat DOM siap
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      checkAuthSession();
+    });
+
+    // Perbarui ikon Lucide secara aman
+    function refreshIcons() {
+      setTimeout(() => {
+        lucide.createIcons();
+      }, 50);
+    }
+
+    // ----------------------------------------------------
+    // TOAST NOTIFIKASI
+    // ----------------------------------------------------
+    function showToast(type, title, message) {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      const titleEl = document.getElementById('toast-title');
+      const msgEl = document.getElementById('toast-message');
+
+      titleEl.innerText = title;
+      msgEl.innerText = message;
+
+      if (type === 'success') {
+        icon.className = 'p-2 rounded-lg bg-emerald-100 text-emerald-700';
+        icon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+      } else {
+        icon.className = 'p-2 rounded-lg bg-rose-100 text-rose-700';
+        icon.innerHTML = '<i data-lucide="alert-circle" class="w-5 h-5"></i>';
+      }
+
+      refreshIcons();
+
+      toast.classList.remove('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(hideToast, 4000);
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }
+
+    // ----------------------------------------------------
+    // AUTENTIKASI: LOGIN, LOGOUT, & CHECK SESSION
+    // ----------------------------------------------------
+    async function checkAuthSession() {
+      try {
+        const res = await fetch(`${API_URL}?action=check_session`);
+        const json = await res.json();
+        if (json.success && json.data && json.data.user) {
+          currentUser = json.data.user;
+          showAppView();
+        } else {
+          showLoginView();
+        }
+      } catch (err) {
+        // Jika server lokal belum menjalankan sesi aktif
+        showLoginView();
+      }
+    }
+
+    function showAuthAlert(message, isSuccess = false) {
+      const alertEl = document.getElementById('auth-alert');
+      const textEl = document.getElementById('auth-alert-text');
+      const iconEl = document.getElementById('auth-alert-icon');
+      
+      textEl.innerText = message;
+      if (isSuccess) {
+        alertEl.className = 'mb-4 p-3 rounded-xl text-xs flex items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200';
+        iconEl.setAttribute('data-lucide', 'check-circle-2');
+      } else {
+        alertEl.className = 'mb-4 p-3 rounded-xl text-xs flex items-center gap-2 bg-rose-50 text-rose-700 border border-rose-200';
+        iconEl.setAttribute('data-lucide', 'alert-circle');
+      }
+      alertEl.classList.remove('hidden');
+      refreshIcons();
+    }
+
+    function hideAuthAlert() {
+      const alertEl = document.getElementById('auth-alert');
+      alertEl.classList.add('hidden');
+    }
+
+    function switchAuthMode(mode) {
+      hideAuthAlert();
+      const formLogin = document.getElementById('form-login');
+      const formRegister = document.getElementById('form-register');
+      const btnTabLogin = document.getElementById('btn-tab-login');
+      const btnTabRegister = document.getElementById('btn-tab-register');
+
+      if (mode === 'register') {
+        formLogin.classList.add('hidden');
+        formRegister.classList.remove('hidden');
+        btnTabRegister.className = 'flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-white text-emerald-700 shadow-sm';
+        btnTabLogin.className = 'flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900';
+      } else {
+        formRegister.classList.add('hidden');
+        formLogin.classList.remove('hidden');
+        btnTabLogin.className = 'flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-white text-emerald-700 shadow-sm';
+        btnTabRegister.className = 'flex-1 py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900';
+      }
+      refreshIcons();
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideAuthAlert();
+      const usernameInput = document.getElementById('login-username').value.trim();
+      const passwordInput = document.getElementById('login-password').value.trim();
+      const btn = document.getElementById('btn-login');
+
+      if (!usernameInput || !passwordInput) {
+        showAuthAlert('Username dan Password wajib diisi!');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memverifikasi...';
+      refreshIcons();
+
+      try {
+        const res = await fetch(`${API_URL}?action=login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: usernameInput, password: passwordInput })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          currentUser = data.data.user;
+          hideAuthAlert();
+          showToast('success', 'Login Berhasil', data.message);
+          showAppView();
+        } else {
+          showAuthAlert(data.message || 'Username atau password salah.');
+        }
+      } catch (err) {
+        showAuthAlert('Gagal terhubung ke api.php. Pastikan server Apache & MySQL aktif!');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="log-in" class="w-4 h-4"></i> Masuk ke Sistem';
+        refreshIcons();
+      }
+    }
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      hideAuthAlert();
+
+      const nama = document.getElementById('reg-nama').value.trim();
+      const username = document.getElementById('reg-username').value.trim();
+      const password = document.getElementById('reg-password').value.trim();
+      const confirm = document.getElementById('reg-confirm').value.trim();
+      const btn = document.getElementById('btn-register');
+
+      if (!nama || !username || !password || !confirm) {
+        showAuthAlert('Semua kolom pendaftaran wajib diisi!');
+        return;
+      }
+
+      if (username.length < 3) {
+        showAuthAlert('Username minimal 3 karakter!');
+        return;
+      }
+
+      if (/\s/.test(username)) {
+        showAuthAlert('Username tidak boleh mengandung spasi!');
+        return;
+      }
+
+      if (password.length < 5) {
+        showAuthAlert('Password minimal 5 karakter demi keamanan!');
+        return;
+      }
+
+      if (password !== confirm) {
+        showAuthAlert('Konfirmasi password tidak cocok dengan password di atas!');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Mendaftarkan...';
+      refreshIcons();
+
+      try {
+        const res = await fetch(`${API_URL}?action=register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            nama_lengkap: nama,
+            username: username,
+            password: password
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showToast('success', 'Akun Berhasil Dibuat', data.message);
+          // Pindahkan ke tab login dengan username sudah terisi
+          switchAuthMode('login');
+          document.getElementById('login-username').value = username;
+          document.getElementById('login-password').value = '';
+          document.getElementById('reg-nama').value = '';
+          document.getElementById('reg-username').value = '';
+          document.getElementById('reg-password').value = '';
+          document.getElementById('reg-confirm').value = '';
+          showAuthAlert('Akun berhasil dibuat! Silakan masukkan password untuk masuk.', true);
+        } else {
+          showAuthAlert(data.message || 'Gagal mendaftarkan akun.');
+        }
+      } catch (err) {
+        showAuthAlert('Gagal mengirim data ke server api.php.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="user-plus" class="w-4 h-4"></i> Daftar Akun Baru';
+        refreshIcons();
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch(`${API_URL}?action=logout`);
+      } catch (e) {}
+      currentUser = null;
+      showToast('success', 'Logout Berhasil', 'Anda telah keluar dari aplikasi.');
+      showLoginView();
+    }
+
+    function showLoginView() {
+      document.getElementById('page-login').classList.remove('hidden');
+      document.getElementById('page-app').classList.add('hidden');
+      refreshIcons();
+    }
+
+    function showAppView() {
+      document.getElementById('page-login').classList.add('hidden');
+      document.getElementById('page-app').classList.remove('hidden');
+      
+      if (currentUser) {
+        document.getElementById('user-display-name').innerText = currentUser.nama_lengkap || currentUser.username;
+      }
+
+      switchTab('dashboard');
+      loadStats();
+      loadEqData();
+      refreshIcons();
+    }
+
+    // ----------------------------------------------------
+    // TAB SWITCHING
+    // ----------------------------------------------------
+    function switchTab(tabId) {
+      const tabs = ['dashboard', 'input', 'data'];
+      tabs.forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        
+        if (t === tabId) {
+          view.classList.remove('hidden');
+          if (btn) {
+            btn.className = 'px-4 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-2 bg-white text-emerald-700 shadow-sm';
+          }
+        } else {
+          view.classList.add('hidden');
+          if (btn) {
+            btn.className = 'px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-2';
+          }
+        }
+      });
+
+      if (tabId === 'dashboard') {
+        loadStats();
+        loadEqData();
+      } else if (tabId === 'data') {
+        loadEqData();
+      }
+
+      refreshIcons();
+    }
+
+    // ----------------------------------------------------
+    // DATA FETCHING: STATISTIK & DAFTAR EQ
+    // ----------------------------------------------------
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API_URL}?action=get_stats`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          document.getElementById('stat-total').innerText = json.data.total ?? 0;
+          document.getElementById('stat-diproses').innerText = json.data.diproses ?? 0;
+          document.getElementById('stat-selesai').innerText = json.data.selesai ?? 0;
+          document.getElementById('stat-batal').innerText = json.data.batal ?? 0;
+        }
+      } catch (err) {
+        console.error('Gagal mengambil statistik:', err);
+      }
+    }
+
+    async function loadEqData() {
+      try {
+        const res = await fetch(`${API_URL}?action=get_all_eq`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          allEqData = json.data;
+          renderTable(allEqData);
+          renderRecentTable(allEqData.slice(0, 5));
+          loadStats();
+        }
+      } catch (err) {
+        console.error('Gagal memuat data EQ:', err);
+      }
+    }
+
+    // Badge styling helper
+    function getStatusBadge(status) {
+      switch (status) {
+        case 'Pending':
+          return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">Pending</span>';
+        case 'Diproses':
+          return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">Diproses</span>';
+        case 'Selesai':
+          return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Selesai</span>';
+        case 'Batal':
+          return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Batal</span>';
+        default:
+          return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">${status}</span>`;
+      }
+    }
+
+    // Format tanggal
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString('id-ID', {
+        day: '2-digit', month: 'short', year: 'numeric'
+      });
+    }
+
+    // Render Tabel Utama Data EQ
+    function renderTable(data) {
+      const tbody = document.getElementById('table-eq-body');
+      const countFiltered = document.getElementById('count-filtered');
+      const countTotal = document.getElementById('count-total');
+
+      countFiltered.innerText = data.length;
+      countTotal.innerText = allEqData.length;
+
+      if (!data || data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-12 text-center text-slate-400 text-sm">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+              Tidak ada data EQ yang ditemukan.
+            </td>
+          </tr>
+        `;
+        refreshIcons();
+        return;
+      }
+
+      tbody.innerHTML = data.map((item, index) => `
+        <tr class="hover:bg-slate-50/80 transition">
+          <td class="py-3 px-4 text-center font-mono text-xs text-slate-400">${index + 1}</td>
+          <td class="py-3 px-4 font-mono font-semibold text-emerald-700">${escapeHtml(item.nomor_eq)}</td>
+          <td class="py-3 px-4 font-medium text-slate-900">${escapeHtml(item.nama_customer)}</td>
+          <td class="py-3 px-4 text-slate-600">${escapeHtml(item.cst)}</td>
+          <td class="py-3 px-4">${getStatusBadge(item.status)}</td>
+          <td class="py-3 px-4 text-xs text-slate-500">${formatDate(item.created_at)}</td>
+          <td class="py-3 px-4 text-center">
+            <div class="inline-flex items-center gap-1.5">
+              <button 
+                onclick="openEditModal(${item.id})" 
+                class="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 transition flex items-center gap-1"
+                title="Edit Data EQ"
+              >
+                <i data-lucide="edit-2" class="w-3 h-3"></i>
+                <span>Edit</span>
+              </button>
+              <button 
+                onclick="openDeleteModal(${item.id}, '${escapeHtml(item.nomor_eq)}')" 
+                class="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 transition flex items-center gap-1"
+                title="Hapus Data EQ"
+              >
+                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                <span>Hapus</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      refreshIcons();
+    }
+
+    // Render Tabel Aktivitas Terbaru di Dashboard
+    function renderRecentTable(recentItems) {
+      const tbody = document.getElementById('table-recent-body');
+      if (!recentItems || recentItems.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-8 text-center text-slate-400 text-xs">Belum ada aktivitas data EQ.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = recentItems.map(item => `
+        <tr class="hover:bg-slate-50/50 transition">
+          <td class="py-3 px-4 font-mono font-semibold text-emerald-700 text-xs">${escapeHtml(item.nomor_eq)}</td>
+          <td class="py-3 px-4 font-medium text-slate-900">${escapeHtml(item.nama_customer)}</td>
+          <td class="py-3 px-4 text-slate-600 text-xs">${escapeHtml(item.cst)}</td>
+          <td class="py-3 px-4">${getStatusBadge(item.status)}</td>
+          <td class="py-3 px-4 text-xs text-slate-500 text-right">${formatDate(item.created_at)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Pencarian & Filter
+    function handleSearchData() {
+      applyFilters();
+    }
+
+    function handleFilterStatus() {
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('data-search-input').value.toLowerCase().trim();
+      const status = document.getElementById('data-status-filter').value;
+
+      const filtered = allEqData.filter(item => {
+        const matchesQuery = !query || 
+          (item.nomor_eq && item.nomor_eq.toLowerCase().includes(query)) ||
+          (item.nama_customer && item.nama_customer.toLowerCase().includes(query)) ||
+          (item.cst && item.cst.toLowerCase().includes(query));
+
+        const matchesStatus = !status || item.status === status;
+
+        return matchesQuery && matchesStatus;
+      });
+
+      renderTable(filtered);
+    }
+
+    // ----------------------------------------------------
+    // FORM INPUT: TAMBAH DATA EQ (CREATE)
+    // ----------------------------------------------------
+    async function handleCreateEq(e) {
+      e.preventDefault();
+      const nomorEq = document.getElementById('create-nomor-eq').value.trim();
+      const namaCustomer = document.getElementById('create-nama-customer').value.trim();
+      const cst = document.getElementById('create-cst').value.trim();
+      const status = document.getElementById('create-status').value;
+      const btn = document.getElementById('btn-simpan-eq');
+
+      if (!nomorEq || !namaCustomer || !cst) {
+        showToast('error', 'Validasi Gagal', 'Semua kolom bertanda * wajib diisi!');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
+      refreshIcons();
+
+      try {
+        const res = await fetch(`${API_URL}?action=create_eq`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nomor_eq: nomorEq,
+            nama_customer: namaCustomer,
+            cst: cst,
+            status: status
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showToast('success', 'Berhasil Disimpan', data.message);
+          document.getElementById('form-create-eq').reset();
+          loadEqData();
+          switchTab('data');
+        } else {
+          showToast('error', 'Penyimpanan Gagal', data.message);
+        }
+      } catch (err) {
+        showToast('error', 'Kesalahan Jaringan', 'Gagal mengirim data ke server MySQL.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Simpan EQ';
+        refreshIcons();
+      }
+    }
+
+    // ----------------------------------------------------
+    // MODAL EDIT: PERBARUI DATA EQ (UPDATE)
+    // ----------------------------------------------------
+    function openEditModal(id) {
+      const item = allEqData.find(d => d.id == id);
+      if (!item) return;
+
+      document.getElementById('edit-id').value = item.id;
+      document.getElementById('edit-nomor-eq').value = item.nomor_eq;
+      document.getElementById('edit-nama-customer').value = item.nama_customer;
+      document.getElementById('edit-cst').value = item.cst;
+      document.getElementById('edit-status').value = item.status;
+
+      const modal = document.getElementById('modal-edit');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      refreshIcons();
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('modal-edit');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function handleUpdateEq(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-id').value;
+      const nomorEq = document.getElementById('edit-nomor-eq').value.trim();
+      const namaCustomer = document.getElementById('edit-nama-customer').value.trim();
+      const cst = document.getElementById('edit-cst').value.trim();
+      const status = document.getElementById('edit-status').value;
+      const btn = document.getElementById('btn-update-eq');
+
+      if (!nomorEq || !namaCustomer || !cst) {
+        showToast('error', 'Validasi Gagal', 'Field tidak boleh kosong.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...';
+      refreshIcons();
+
+      try {
+        const res = await fetch(`${API_URL}?action=update_eq`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: id,
+            nomor_eq: nomorEq,
+            nama_customer: namaCustomer,
+            cst: cst,
+            status: status
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showToast('success', 'Pembaruan Berhasil', data.message);
+          closeEditModal();
+          loadEqData();
+        } else {
+          showToast('error', 'Gagal Memperbarui', data.message);
+        }
+      } catch (err) {
+        showToast('error', 'Kesalahan Server', 'Gagal memperbarui data di MySQL.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Simpan Perubahan';
+        refreshIcons();
+      }
+    }
+
+    // ----------------------------------------------------
+    // MODAL HAPUS: DELETE DATA EQ
+    // ----------------------------------------------------
+    function openDeleteModal(id, nomorEq) {
+      document.getElementById('delete-id').value = id;
+      document.getElementById('delete-nomor-eq').innerText = nomorEq;
+
+      const modal = document.getElementById('modal-delete');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      refreshIcons();
+    }
+
+    function closeDeleteModal() {
+      const modal = document.getElementById('modal-delete');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function confirmDeleteEq() {
+      const id = document.getElementById('delete-id').value;
+      const btn = document.getElementById('btn-confirm-delete');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menghapus...';
+      refreshIcons();
+
+      try {
+        const res = await fetch(`${API_URL}?action=delete_eq`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showToast('success', 'Data Dihapus', data.message);
+          closeDeleteModal();
+          loadEqData();
+        } else {
+          showToast('error', 'Gagal Menghapus', data.message);
+        }
+      } catch (err) {
+        showToast('error', 'Kesalahan Server', 'Gagal menghapus data.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i> Ya, Hapus Data';
+        refreshIcons();
+      }
+    }
+
+    // Helper Generator Nomor EQ Otomatis
+    function generateEqNumber(targetId) {
+      const year = new Date().getFullYear();
+      const rand = Math.floor(100 + Math.random() * 900);
+      const generated = `EQ-${year}-MDN-${rand}`;
+      document.getElementById(targetId).value = generated;
+    }
+
+    // Helper Sanitasi HTML
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+
+</body>
+</html>
