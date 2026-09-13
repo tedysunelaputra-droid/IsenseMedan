@@ -105,7 +105,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span className="text-xs text-slate-500 font-medium">berkas</span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Total seluruh equipment tercatat
+            Total seluruh data tercatat
           </p>
         </div>
 
@@ -157,7 +157,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">
-            Distribusi Status Verifikasi Equipment
+            Distribusi Status Verifikasi 
           </h3>
           <span className="text-xs text-slate-500 font-medium">
             Total {stats.total} data
