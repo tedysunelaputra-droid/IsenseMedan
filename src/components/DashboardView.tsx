@@ -63,10 +63,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <span>Sistem Monitoring Real-time</span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight font-display">
-            Sistem Informasi Data Equipment (EQ)
+            Sistem Informasi Data EQ
           </h1>
           <p className="mt-2 text-sm sm:text-base text-emerald-100/90 leading-relaxed font-sans max-w-2xl">
-            Kelola pencatatan dan verifikasi data equipment pelanggan untuk wilayah operasional Medan dan sekitarnya dengan status Terdaftar atau Tidak.
+            Kelola pencatatan dan verifikasi data pelanggan untuk wilayah operasional Medan dan sekitarnya dengan status Terdaftar atau Tidak.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <button
