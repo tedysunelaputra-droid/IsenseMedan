@@ -90,7 +90,7 @@ export const InputEqView: React.FC<InputEqViewProps> = ({
           <div>
             <h2 className="text-xl font-bold text-slate-900">Formulir Input Data EQ</h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Input data equipment/estimation baru untuk diproses dan disimpan ke dalam sistem
+               Lengkapi seluruh formulir di bawah ini dengan valid untuk mencatat data baru.
             </p>
           </div>
         </div>
