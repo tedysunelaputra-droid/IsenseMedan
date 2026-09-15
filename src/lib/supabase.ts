@@ -4,8 +4,8 @@ import { DataEq, User, EqStatus } from '../types';
 // Ambil konfigurasi dari environment variable Vite (.env)
 // Atau bisa disimpan di localStorage jika pengguna memasukkan via UI dialog pengaturan
 const metaEnv = (import.meta as unknown as { env?: Record<string, string> }).env || {};
-const ENV_URL = metaEnv.VITE_SUPABASE_URL || '';
-const ENV_KEY = metaEnv.VITE_SUPABASE_ANON_KEY || '';
+const ENV_URL = metaEnv.VITE_SUPABASE_URL || 'https://vmqduaitxinztmujoyez.supabase.co';
+const ENV_KEY = metaEnv.VITE_SUPABASE_ANON_KEY || 'sb_publishable_cIkuJYvpuSlRrJXtD6gkZQ_95oA39Du';
 
 let supabaseInstance: SupabaseClient | null = null;
 
